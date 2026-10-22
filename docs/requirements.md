@@ -18,7 +18,7 @@ Fonte: `coe-leader-desenvolvimento-candidatura-desafio-tecnico.md` (desafio ofic
 
 | ID | Requisito | Implementação |
 |---|---|---|
-| RNF-01 | Stack justificada | Java 17 + Spring Boot 3 (ADR-001) |
+| RNF-01 | Stack justificada | Java 25 (LTS) + Spring Boot 3 (ADR-001) |
 | RNF-02 | Clean Code e Clean Architecture | Camadas domain/application/infrastructure/presentation (ADR-003) |
 | RNF-03 | Banco relacional | PostgreSQL 16 (ADR-002) |
 | RNF-04 | Consultas parametrizadas, sem concatenação de strings | Spring Data JPA (JPQL/derived queries) — sem SQL dinâmico concatenado |

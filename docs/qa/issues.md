@@ -66,8 +66,8 @@ As respostas do Catálogo omitem `currentPrice` ou `validTo` quando seus valores
 
 ## Environment and commit
 
-- Ambiente: aplicação local via Docker Compose; endpoint do Catálogo.
-- Commit: indisponível; o workspace não possui metadados Git.
+- Ambiente: aplicação local via Docker Compose e GitHub Actions Linux (Testcontainers MongoDB).
+- Commits verificados: `f56e0128fd19d374f1af7c13f7db1fb06dec849c` e `6676d3bdf39e7918512a777420f27a1092c5913d`, branch `feature/COE-Leader`.
 
 ## Requirement / test case
 
@@ -100,6 +100,7 @@ Para `PROD-003`, `validTo` é omitido. Para `PROD-005` e `PROD-006`, `currentPri
 - Screenshot / Playwright trace / logs: cenário da API em `catalog.spec.ts`; divergência reportada após comparar a resposta ao contrato.
 - Evidência adicional: GitHub Actions CI #1, job `catalog-service`, commit `f56e0128fd19d374f1af7c13f7db1fb06dec849c`; `CatalogApiIT.batchPricesReturnsNullCurrentPriceForProductWithoutValidWindow` falhou na asserção da linha 105. [Logs do job](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632/job/119583273820).
 - Confirmação: o mesmo teste falhou na CI #2 após estabilização dos fixtures, descartando uma data de preço vencida como causa. [Logs do job](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39707684840/job/119591457166).
+- Confirmação adicional: a execução anexada de `mvn -B -f catalog-service/pom.xml verify` reproduziu a falha em `CatalogApiIT.batchPricesReturnsNullCurrentPriceForProductWithoutValidWindow` (linha 105); 5 dos 6 testes de integração passaram. [Log detalhado da CI #3](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39708641019).
 - Scanner / advisory / artifact link (for security findings): não aplicável.
 
 ## Impact and severity (S1-S4)
@@ -413,9 +414,9 @@ S3 — provisório, aguardando decisão de arquitetura/segurança. A ausência d
 
 ## Reexecução e análise da cobertura — 21/10/2026
 
-- Reexecutada a suíte completa Playwright (testes API e UI antigos e novos): **73 cenários, 65 aprovados e 8 falhos**. As oito falhas são repetições/retries de quatro grupos de defeitos funcionais (QA-ISSUE-001 a 004), não oito defeitos independentes. O baseline ZAP local posterior originou a verificação QA-ISSUE-005 e registrou os achados de segurança QA-ISSUE-006 e QA-ISSUE-007.
+- Reexecutada a suíte completa Playwright (testes API e UI antigos e novos): **73 cenários, 65 aprovados e 8 falhos**. Os oito casos falhos estão agrupados em quatro defeitos funcionais (QA-ISSUE-001 a 004), não são oito defeitos independentes. O baseline ZAP local posterior originou a verificação QA-ISSUE-005 e registrou os achados de segurança QA-ISSUE-006 e QA-ISSUE-007.
 - A nova cobertura passou em preço/totais adulterados pelo cliente, status inválido, request ID gerado e fornecido, tamanho de corpo exatamente 1 MiB, criação sequencial de pedido, 100 itens na UI e 101 rejeitados.
-- Depois de restaurar o sistema original, o Angular passou lint, 53 testes unitários e build de produção. `mvn` não está no PATH e os testes Java/Testcontainers não foram reexecutados. O smoke k6 atualizado foi executado via container oficial em projeto Compose descartável (524 requisições, 1.257 checks aprovados), incluindo criação; os dados e volumes temporários foram removidos. O workflow CI ainda não foi executado.
+- Depois de restaurar o sistema original, o Angular passou lint, 53 testes unitários e build de produção. Naquela execução, `mvn` não estava no PATH e os testes Java/Testcontainers não foram reexecutados. O smoke k6 atualizado foi executado via container oficial em projeto Compose descartável (524 requisições, 1.257 checks aprovados), incluindo criação; os dados e volumes temporários foram removidos. O workflow CI ainda não havia sido executado naquele momento; os resultados das execuções posteriores estão registrados abaixo.
 - Para as lacunas e melhorias recomendadas (bordas temporais exatas de `validFrom`/`validTo`, normalização de `size > 100`, payload 1 MiB - 1 byte e resiliência pós-restauração), consultar a seção de revisão de cobertura em [09-sdd-business-rules.md](./09-sdd-business-rules.md).
 
 ## Evidência complementar — CI GitHub Actions #1 (22/10/2026)
@@ -425,6 +426,12 @@ Na execução do PR #1, oito testes Playwright falharam em quatro grupos já des
 ## Reexecução GitHub Actions #2 (22/10/2026)
 
 A correção de fixture eliminou as falhas espúrias de criação/indisponibilidade e a expectativa SQL rígida; `OrderPersistenceIT` passou (3/3), e `order-service` ficou com apenas `catalogTimeoutReturns504` falhando (500 em vez de 504). O Catálogo manteve uma falha (campo nulo omitido). A suíte Playwright ainda reportou oito falhas nos quatro grupos QA-ISSUE-001 a 004. Evidências: [order-service](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39707684840/job/119591457029), [catalog-service](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39707684840/job/119591457166) e [functional-qa](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39707684840/job/119591457269).
+
+## Falha de build anexada — Catalog Service
+
+O log anexado executa somente `mvn -B -f catalog-service/pom.xml verify`. Build, compilação, Spotless, 14 testes unitários e inicialização do MongoDB/Testcontainers foram concluídos; 5/6 testes de integração passaram. O build falha exclusivamente porque a resposta de lote não contém a propriedade JSON `currentPrice` quando não há preço vigente, embora o contrato em `docs/api.md` exija `"currentPrice": null`. A mensagem HTTP 401 para metadados de um repositório Maven foi um aviso não bloqueante: as dependências foram obtidas do Maven Central e o Failsafe chegou a executar asserções. O defeito já está descrito acima em QA-ISSUE-002 e foi aberto no GitHub como #2.
+
+Nenhuma falha de `order-service` consta no texto anexado, que não executa seu build. Não inferir aprovação nem falha de pedidos a partir deste log; a CI separada de Orders permanece evidência distinta.
 
 ## QA-ISSUE-008 — Timeout de leitura do Catálogo retorna HTTP 500 em vez de 504
 

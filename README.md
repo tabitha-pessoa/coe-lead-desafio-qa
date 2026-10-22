@@ -23,7 +23,8 @@ Ambos seguem Clean Architecture em pacotes `domain` / `application` / `infrastru
 
 ## Requisitos
 
-- Java 17 e Maven 3.9 (para build local)
+- Java 25 (LTS) e Maven 3.9 (para build local)
+- Node.js conforme `.nvmrc` (para frontend, QA funcional e auditoria npm)
 - Docker + Docker Compose (para execução integrada e testes de integração)
 
 ## Execução (Docker Compose)

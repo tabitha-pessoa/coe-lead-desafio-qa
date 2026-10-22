@@ -206,7 +206,7 @@ S3 — provisório para o status incorreto e o sinal operacional; sem evidência
 - O baseline ZAP local foi executado nos três alvos e gerou JSON/HTML. Resumo: frontend com 8 alertas não informativos e 2 informativos; cada API com 1 alerta não informativo e 1 informativo.
 - Os relatórios temporários foram removidos após a triagem. A execução local não valida a publicação de artifacts no GitHub Actions.
 - OWASP Dependency-Check Maven está configurado no CI, mas os jobs Java falharam em `mvn verify` antes de chegar às etapas Dependency-Check.
-- As execuções [CI #1](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632) e [CI #2](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39707684840) confirmaram os resultados dos jobs; artifacts devem ser verificados individualmente antes de afirmar retenção de cada relatório.
+- As execuções [CI #1](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632), [CI #2](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39707684840) e CI #3 confirmaram os resultados dos jobs; artifacts devem ser verificados individualmente antes de afirmar retenção de cada relatório.
 - O gate `node-security` bloqueia build/publicação quando a auditoria frontend encontra advisories altos/críticos, até remediação ou aceite formal.
 - Para correção/triagem de cada comportamento reproduzido, consultar [issues.md](./issues.md). A remediação de dependências requer aprovação do responsável pelo produto; o sistema sob teste foi preservado.
 - Manter credenciais, segredos, dados pessoais reais e payloads sensíveis fora de issues e artifacts.

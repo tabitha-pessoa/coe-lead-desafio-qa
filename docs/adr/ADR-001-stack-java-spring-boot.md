@@ -1,4 +1,4 @@
-# ADR-001: Stack Java 17 + Spring Boot 3
+# ADR-001: Stack Java 25 + Spring Boot 3
 
 **Status:** Aceita
 
@@ -8,7 +8,7 @@ O desafio permite qualquer stack justificada. O candidato possui vivência multi
 
 ## Decisão
 
-Java 17 (LTS) com Spring Boot 3.3 para ambos os serviços: maturidade de ecossistema (Spring Data, Testcontainers, Flyway), tipagem forte para regras monetárias e alinhamento com o contexto da vaga.
+Java 25 (LTS) com Spring Boot 3.5.16 para ambos os serviços: maturidade de ecossistema (Spring Data, Testcontainers, Flyway), tipagem forte para regras monetárias e alinhamento com o contexto da vaga.
 
 ## Consequências
 
