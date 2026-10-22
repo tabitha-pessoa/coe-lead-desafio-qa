@@ -1,0 +1,12 @@
+target/
+node_modules/
+dist/
+.idea/
+.vscode/
+*.iml
+.env
+*.log
+qa-tests/playwright-report/
+qa-tests/test-results/
+frontend/coverage/
+frontend/.angular/
