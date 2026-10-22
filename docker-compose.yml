@@ -1,0 +1,73 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: orders
+      POSTGRES_PASSWORD: orders
+      POSTGRES_DB: orders
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orders -d orders"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mongo:
+    image: mongo:7
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./docker/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  catalog-service:
+    build: ./catalog-service
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/catalog
+      SPRING_PROFILES_ACTIVE: json
+    ports:
+      - "8081:8081"
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  order-service:
+    build: ./order-service
+    environment:
+      POSTGRES_URL: jdbc:postgresql://postgres:5432/orders
+      POSTGRES_USER: orders
+      POSTGRES_PASSWORD: orders
+      CATALOG_BASE_URL: http://catalog-service:8081
+      SPRING_PROFILES_ACTIVE: json
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      catalog-service:
+        condition: service_started
+
+  frontend:
+    build: ./frontend
+    environment:
+      ORDER_SERVICE_URL: http://order-service:8080
+      CATALOG_SERVICE_URL: http://catalog-service:8081
+    ports:
+      - "4200:80"
+    depends_on:
+      order-service:
+        condition: service_started
+      catalog-service:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  mongo_data:

@@ -1,0 +1,16 @@
+<app-header [menuExpanded]="sidebarOpen()" (menuToggle)="sidebarOpen.set(!sidebarOpen())" />
+<div class="app-content d-flex align-items-stretch">
+  <app-sidebar [open]="sidebarOpen()" (navigated)="sidebarOpen.set(false)" />
+  @if (sidebarOpen()) {
+    <div
+      class="app-sidebar-backdrop d-lg-none"
+      role="presentation"
+      (click)="sidebarOpen.set(false)"
+    ></div>
+  }
+  <main class="flex-grow-1 p-3 p-md-4">
+    <router-outlet />
+  </main>
+</div>
+<app-footer />
+<app-toasts-container />

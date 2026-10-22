@@ -1,0 +1,15 @@
+# Dependabot desabilitado temporariamente: renomeie de volta para dependabot.yml para reativar.
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: "/catalog-service"
+    schedule:
+      interval: weekly
+  - package-ecosystem: maven
+    directory: "/order-service"
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly

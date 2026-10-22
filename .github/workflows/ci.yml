@@ -1,0 +1,383 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  catalog-service:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+          cache-dependency-path: catalog-service/pom.xml
+      - name: Lint (spotless)
+        run: mvn -B -f catalog-service/pom.xml spotless:check
+      - name: Build, unit and integration tests
+        run: mvn -B -f catalog-service/pom.xml verify
+      - name: Dependency vulnerability check
+        run: mvn -B -f catalog-service/pom.xml org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7 -DnvdApiKey=${{ secrets.NVD_API_KEY }}
+      - name: Upload catalog-service test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog-service-test-reports
+          path: |
+            catalog-service/target/surefire-reports/
+            catalog-service/target/failsafe-reports/
+            catalog-service/target/dependency-check-report.*
+          if-no-files-found: ignore
+
+  order-service:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+          cache-dependency-path: order-service/pom.xml
+      - name: Lint (spotless)
+        run: mvn -B -f order-service/pom.xml spotless:check
+      - name: Build, unit and integration tests
+        run: mvn -B -f order-service/pom.xml verify
+      - name: Dependency vulnerability check
+        run: mvn -B -f order-service/pom.xml org.owasp:dependency-check-maven:check -DfailBuildOnCVSS=7 -DnvdApiKey=${{ secrets.NVD_API_KEY }}
+      - name: Upload order-service test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: order-service-test-reports
+          path: |
+            order-service/target/surefire-reports/
+            order-service/target/failsafe-reports/
+            order-service/target/dependency-check-report.*
+          if-no-files-found: ignore
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint (eslint)
+        run: npm run lint
+      - name: Format check (prettier)
+        run: npm run format:check
+      - name: Unit tests (vitest)
+        run: npm run test
+      - name: Production build
+        run: npm run build:prod
+
+  functional-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: qa-tests/package-lock.json
+      - name: Install Playwright dependencies
+        working-directory: qa-tests
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Type-check API and UI automation
+        working-directory: qa-tests
+        run: npm run typecheck
+      - name: Start system under test
+        run: docker compose up --build -d
+      - name: Wait for services
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/actuator/health >/dev/null && curl -fsS http://localhost:8081/actuator/health >/dev/null && curl -fsS http://localhost:4200/ >/dev/null; then exit 0; fi
+            sleep 5
+          done
+          docker compose ps
+          docker compose logs --no-color
+          exit 1
+      - name: Run API and UI automated tests
+        working-directory: qa-tests
+        env:
+          CI: "true"
+          ORDER_URL: http://localhost:8080
+          CATALOG_URL: http://localhost:8081
+          FRONTEND_URL: http://localhost:4200
+        run: npm test
+      - name: Upload API and UI reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: functional-qa-reports
+          path: |
+            qa-tests/playwright-report/
+            qa-tests/test-results/
+          if-no-files-found: ignore
+      - name: Stop system under test
+        if: always()
+        run: docker compose down -v
+
+  performance-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start disposable system under test
+        run: docker compose up --build -d
+      - name: Wait for services
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/actuator/health >/dev/null && curl -fsS http://localhost:8081/actuator/health >/dev/null; then exit 0; fi
+            sleep 5
+          done
+          docker compose ps
+          docker compose logs --no-color
+          exit 1
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates gnupg
+          curl -fsSL https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
+          echo 'deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main' | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+      - name: Run performance quality gate
+        env:
+          ORDER_URL: http://localhost:8080
+          CATALOG_URL: http://localhost:8081
+          K6_PROFILE: smoke
+          PERF_ENABLE_ORDER_CREATION: "true"
+        run: |
+          {
+            echo "commit=$GITHUB_SHA"
+            echo "runner_os=$RUNNER_OS"
+            uname -a
+            docker version
+            docker compose version
+            k6 version
+          } > performance-environment.txt
+          (
+            while true; do
+              date --iso-8601=seconds
+              docker stats --no-stream --format '{{.Name}} cpu={{.CPUPerc}} memory={{.MemUsage}}'
+              sleep 5
+            done
+          ) > docker-stats.txt &
+          stats_pid=$!
+          trap 'kill "$stats_pid" 2>/dev/null || true; wait "$stats_pid" 2>/dev/null || true' EXIT
+          k6 run --summary-export=k6-summary.json performance/k6-orders.js
+      - name: Upload performance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-qa-reports
+          path: |
+            k6-summary.json
+            performance-environment.txt
+            docker-stats.txt
+          if-no-files-found: ignore
+      - name: Stop system under test
+        if: always()
+        run: docker compose down -v
+
+  node-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Audit frontend and QA automation dependencies
+        run: |
+          set +e
+          status=0
+          (cd frontend && npm ci && npm audit --audit-level=high --json > ../npm-audit-frontend.json)
+          frontend_status=$?
+          (cd qa-tests && npm ci && npm audit --audit-level=high --json > ../npm-audit-qa.json)
+          qa_status=$?
+          if [ "$frontend_status" -ne 0 ] || [ "$qa_status" -ne 0 ]; then status=1; fi
+          exit "$status"
+      - name: Upload npm audit reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-reports
+          path: |
+            npm-audit-frontend.json
+            npm-audit-qa.json
+          if-no-files-found: ignore
+
+  docker-build:
+    needs: [catalog-service, order-service, frontend, functional-qa, performance-qa, node-security, security-baseline]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare image names
+        id: image-names
+        run: |
+          repository="$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')"
+          echo "catalog=ghcr.io/${repository}-catalog-service" >> "$GITHUB_OUTPUT"
+          echo "orders=ghcr.io/${repository}-order-service" >> "$GITHUB_OUTPUT"
+          echo "frontend=ghcr.io/${repository}-frontend" >> "$GITHUB_OUTPUT"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build catalog-service image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./catalog-service
+          push: false
+          tags: ${{ steps.image-names.outputs.catalog }}:ci-${{ github.sha }}
+          cache-from: type=gha,scope=catalog-service
+          cache-to: type=gha,mode=max,scope=catalog-service
+      - name: Build order-service image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./order-service
+          push: false
+          tags: ${{ steps.image-names.outputs.orders }}:ci-${{ github.sha }}
+          cache-from: type=gha,scope=order-service
+          cache-to: type=gha,mode=max,scope=order-service
+      - name: Build frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: false
+          tags: ${{ steps.image-names.outputs.frontend }}:ci-${{ github.sha }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+  publish-images:
+    needs: docker-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare image names
+        id: image-names
+        run: |
+          repository="$(echo "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')"
+          echo "catalog=ghcr.io/${repository}-catalog-service" >> "$GITHUB_OUTPUT"
+          echo "orders=ghcr.io/${repository}-order-service" >> "$GITHUB_OUTPUT"
+          echo "frontend=ghcr.io/${repository}-frontend" >> "$GITHUB_OUTPUT"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish catalog-service image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./catalog-service
+          push: true
+          tags: |
+            ${{ steps.image-names.outputs.catalog }}:sha-${{ github.sha }}
+            ${{ steps.image-names.outputs.catalog }}:latest
+          cache-from: type=gha,scope=catalog-service
+          cache-to: type=gha,mode=max,scope=catalog-service
+      - name: Publish order-service image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./order-service
+          push: true
+          tags: |
+            ${{ steps.image-names.outputs.orders }}:sha-${{ github.sha }}
+            ${{ steps.image-names.outputs.orders }}:latest
+          cache-from: type=gha,scope=order-service
+          cache-to: type=gha,mode=max,scope=order-service
+      - name: Publish frontend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ steps.image-names.outputs.frontend }}:sha-${{ github.sha }}
+            ${{ steps.image-names.outputs.frontend }}:latest
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+  security-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      COMPOSE_PROJECT_NAME: qa-security-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start disposable system under test
+        run: docker compose up --build -d
+      - name: Wait for application endpoints
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/actuator/health >/dev/null && curl -fsS http://localhost:8081/actuator/health >/dev/null && curl -fsS http://localhost:4200/ >/dev/null; then exit 0; fi
+            sleep 5
+          done
+          docker compose ps
+          docker compose logs --no-color
+          exit 1
+      - name: Run OWASP ZAP passive baseline against local services
+        run: |
+          set +e
+          result=0
+          for target in frontend:80 order-service:8080 catalog-service:8081; do
+            case "$target" in
+              frontend:80) name=frontend ;;
+              order-service:8080) name=orders ;;
+              catalog-service:8081) name=catalog ;;
+            esac
+            docker run --rm --network "${COMPOSE_PROJECT_NAME}_default" \
+              -v "$GITHUB_WORKSPACE:/zap/wrk/:rw" \
+              ghcr.io/zaproxy/zaproxy:stable \
+              zap-baseline.py -t "http://${target%:*}:${target#*:}" -m 2 -I \
+              -J "zap-${name}.json" -r "zap-${name}.html"
+            scan_status=$?
+            if [ "$scan_status" -ne 0 ]; then result=1; fi
+          done
+          exit "$result"
+      - name: Upload ZAP reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-reports
+          path: |
+            zap-frontend.json
+            zap-frontend.html
+            zap-orders.json
+            zap-orders.html
+            zap-catalog.json
+            zap-catalog.html
+          if-no-files-found: ignore
+      - name: Stop system under test
+        if: always()
+        run: docker compose down -v

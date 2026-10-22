@@ -1,0 +1,79 @@
+<div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-4">
+  <h1 class="h3 mb-0">{{ 'orders.title' | t }}</h1>
+  <a routerLink="/orders/new" class="btn btn-primary">{{ 'orders.new' | t }}</a>
+</div>
+
+@if (loading()) {
+  <app-loading />
+} @else if (error(); as pageError) {
+  <app-error-state [error]="pageError" (retry)="load()" />
+} @else if (result(); as page) {
+  @if (page.content.length === 0) {
+    <app-empty-state
+      messageKey="orders.empty"
+      hintKey="orders.emptyHint"
+      actionLabelKey="orders.new"
+      (action)="navigateToNew()"
+    />
+  } @else {
+    <div class="table-responsive">
+      <table class="table table-striped table-hover align-middle">
+        <caption class="visually-hidden">
+          {{
+            'orders.title' | t
+          }}
+        </caption>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'orders.list.id' | t }}</th>
+            <th scope="col">{{ 'orders.list.client' | t }}</th>
+            <th scope="col" class="text-end">{{ 'orders.list.items' | t }}</th>
+            <th scope="col" class="text-end">{{ 'orders.list.subtotal' | t }}</th>
+            <th scope="col" class="text-end">{{ 'orders.list.discount' | t }}</th>
+            <th scope="col" class="text-end">{{ 'orders.list.total' | t }}</th>
+            <th scope="col">{{ 'orders.list.status' | t }}</th>
+            <th scope="col">{{ 'orders.list.createdAt' | t }}</th>
+            <th scope="col">{{ 'orders.list.actions' | t }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (order of page.content; track order.id) {
+            <tr>
+              <td>
+                <span class="font-monospace" [ngbTooltip]="order.id">{{ shortId(order.id) }}</span>
+              </td>
+              <td>{{ order.client.name }}</td>
+              <td class="text-end">{{ order.items.length }}</td>
+              <td class="text-end">{{ order.subtotal | appCurrency }}</td>
+              <td class="text-end">{{ order.discount | appCurrency }}</td>
+              <td class="text-end fw-semibold">{{ order.total | appCurrency }}</td>
+              <td><app-status-badge [status]="order.status" /></td>
+              <td>{{ order.createdAt | appDate }}</td>
+              <td>
+                <a
+                  class="btn btn-sm btn-outline-primary"
+                  [routerLink]="['/orders', order.id]"
+                  [attr.aria-label]="'orders.list.viewAria' | t: { id: order.id }"
+                >
+                  {{ 'orders.list.view' | t }}
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (page.totalPages > 1) {
+      <nav class="d-flex justify-content-center" [attr.aria-label]="'orders.list.pagination' | t">
+        <ngb-pagination
+          [page]="currentPage()"
+          [pageSize]="pageSize"
+          [collectionSize]="page.totalElements"
+          [disabled]="loading()"
+          (pageChange)="onPageChange($event)"
+        />
+      </nav>
+    }
+  }
+}

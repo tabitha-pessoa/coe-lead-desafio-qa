@@ -1,0 +1,73 @@
+<div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-4">
+  <div>
+    <h1 class="h3 mb-1">{{ 'dashboard.title' | t }}</h1>
+    <p class="text-body-secondary mb-0">{{ 'dashboard.subtitle' | t }}</p>
+  </div>
+</div>
+
+@if (loading()) {
+  <app-loading />
+} @else if (error(); as pageError) {
+  <app-error-state [error]="pageError" (retry)="load()" />
+} @else if (result(); as page) {
+  @if (page.content.length === 0) {
+    <app-empty-state messageKey="dashboard.empty" />
+  } @else {
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-md-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-body-secondary small mb-1">{{ 'dashboard.ordersTotal' | t }}</p>
+            <p class="h2 mb-0">{{ ordersTotal() }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-body-secondary small mb-1">{{ 'dashboard.valueLoaded' | t }}</p>
+            <p class="h2 mb-0">{{ valueLoaded() | appCurrency }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="card h-100">
+          <div class="card-body">
+            <p class="text-body-secondary small mb-1">{{ 'dashboard.byStatus' | t }}</p>
+            <div class="d-flex flex-wrap gap-2">
+              @for (item of statusCounts(); track item.status) {
+                <span class="d-inline-flex align-items-center gap-1">
+                  <app-status-badge [status]="item.status" />
+                  <span class="fw-semibold">{{ item.count }}</span>
+                </span>
+              }
+            </div>
+            <p class="text-body-secondary small mt-2 mb-0">
+              {{ 'dashboard.ordersLoaded' | t }}: {{ ordersLoaded() }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="alert alert-info d-flex gap-2 align-items-start" role="note">
+    <span class="fw-semibold">{{ 'dashboard.gapTitle' | t }}</span>
+    <span>{{ 'dashboard.gapMessage' | t }}</span>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <h2 class="h5 mb-3">{{ 'dashboard.quickActions' | t }}</h2>
+      <div class="d-grid gap-2 d-sm-flex flex-sm-wrap">
+        <a routerLink="/orders/new" class="btn btn-primary">{{ 'dashboard.newOrder' | t }}</a>
+        <a routerLink="/orders" class="btn btn-outline-secondary">{{
+          'dashboard.viewOrders' | t
+        }}</a>
+        <a routerLink="/catalog" class="btn btn-outline-secondary">{{
+          'dashboard.viewCatalog' | t
+        }}</a>
+      </div>
+    </div>
+  </div>
+}

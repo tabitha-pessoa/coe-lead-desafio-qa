@@ -1,0 +1,22 @@
+// O footer só fica preso ao rodapé se este host for um flex container de
+// coluna ocupando ao menos a altura da viewport, empurrando o footer para
+// baixo quando o conteúdo da página é menor que a tela.
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-sidebar-backdrop {
+  position: fixed;
+  top: var(--app-header-height);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1040;
+}
+
+main {
+  min-width: 0;
+}

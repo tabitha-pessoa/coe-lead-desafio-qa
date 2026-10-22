@@ -1,0 +1,81 @@
+// Estilos globais da aplicação.
+// Bootstrap é carregado via angular.json (CSS compilado, sem JS — o
+// comportamento interativo é fornecido pelo ng-bootstrap).
+
+:root {
+  --app-header-height: 56px;
+  --app-sidebar-width: 220px;
+
+  // Paleta da marca (tons de azul/navy).
+  --brand-100: #eaf2fb; // fundo claro / tints
+  --brand-300: #7fa8d6; // acentos suaves, bordas
+  --brand-600: #2f6fb5; // ação primária
+  --brand-700: #1b4b7a; // hover / ênfase
+  --brand-900: #0e2f52; // header, sidebar ativo, footer
+  --brand-600-rgb: 47, 111, 181;
+
+  // Sobrescreve variáveis do Bootstrap para refletir a paleta em toda a UI
+  // (botões, links, badges e utilitários "*-primary").
+  --bs-primary: var(--brand-600);
+  --bs-primary-rgb: var(--brand-600-rgb);
+  --bs-link-color: var(--brand-700);
+  --bs-link-color-rgb: 27, 75, 122;
+  --bs-link-hover-color: var(--brand-900);
+  --bs-link-hover-color-rgb: 14, 47, 82;
+}
+
+// Garante que o conteúdo ocupe a altura útil entre header e footer.
+.app-root,
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-content {
+  flex: 1 1 auto;
+  align-items: stretch;
+}
+
+// Foco visível consistente (acessibilidade).
+:focus-visible {
+  outline: 2px solid var(--brand-600);
+  outline-offset: 2px;
+}
+
+// Botões primários usando a paleta da marca.
+.btn-primary {
+  --bs-btn-bg: var(--brand-600);
+  --bs-btn-border-color: var(--brand-600);
+  --bs-btn-hover-bg: var(--brand-700);
+  --bs-btn-hover-border-color: var(--brand-700);
+  --bs-btn-active-bg: var(--brand-900);
+  --bs-btn-active-border-color: var(--brand-900);
+  --bs-btn-focus-shadow-rgb: var(--brand-600-rgb);
+  --bs-btn-disabled-bg: var(--brand-300);
+  --bs-btn-disabled-border-color: var(--brand-300);
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--brand-700);
+  --bs-btn-border-color: var(--brand-300);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--brand-700);
+  --bs-btn-hover-border-color: var(--brand-700);
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--brand-900);
+  --bs-btn-active-border-color: var(--brand-900);
+}
+
+// Cards com leve elevação e acento superior na paleta.
+.card {
+  border-color: var(--brand-100);
+  box-shadow: 0 1px 3px rgba(14, 47, 82, 0.08);
+}
+
+// Conteúdo centralizado com largura confortável em telas grandes.
+main {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+}
