@@ -52,8 +52,8 @@ Execução real no PR #1, branch `feature/COE-Leader`, commit `f56e0128fd19d374f
 | Job | Resultado | Evidência / interpretação |
 |---|---|---|
 | `catalog-service` | Falhou | 5 de 6 testes passaram; a resposta omite `currentPrice: null`, reproduzindo QA-ISSUE-002. |
-| `order-service` | Falhou | Quatro asserções: timeout retornou 500 em vez de 504; a criação e a indisponibilidade também falharam sob mock compartilhado; a expectativa rígida de 3 consultas recebeu 2. Os dois últimos cenários estão sendo corrigidos/isolados na suíte antes de concluir se são defeitos do produto. |
-| `frontend` | Falhou | Gate Prettier encontrou apenas o template original do sidebar; teste unitário e build não foram alcançados nesse job. A configuração foi ajustada para preservar esse arquivo de origem, mantendo o check nos demais arquivos. |
+| `order-service` | Falhou | A primeira execução mostrou timeout 500, dois resultados influenciados pelo mock compartilhado e uma expectativa SQL rígida. Após correção dos fixtures/limite, CI #2 passou `OrderPersistenceIT` (3/3) e os casos de criação/indisponibilidade; permanece só o timeout 500 em vez de 504 (10 testes totais, 1 falha). |
+| `frontend` | Falhou na CI #1; passou na CI #2 | O gate Prettier inicialmente encontrou apenas o template original do sidebar. A exceção foi documentada para preservar esse arquivo; na reexecução passaram lint, formatação, 53 testes unitários e build de produção. |
 | `functional-qa` | Falhou | 8 cenários Playwright falharam, correspondendo aos comportamentos previamente reportados; consultar [issues.md](./issues.md) e o relatório artifact. |
 | `node-security` | Falhou | 11 pacotes vulneráveis (2 críticos, 6 altos, 3 moderados) no frontend; zero na automação QA. Achados/identificadores e artifact em [security-findings.md](./security-findings.md). |
 | `performance-qa` | Passou | k6 concluiu os thresholds do perfil smoke da esteira. |
@@ -63,3 +63,5 @@ Execução real no PR #1, branch `feature/COE-Leader`, commit `f56e0128fd19d374f
 A execução local de Maven a partir de um container Docker não conseguiu conectar o Testcontainers ao daemon do Docker Desktop; por isso, ela não substitui a validação Linux do GitHub Actions. O workflow continua sendo a evidência principal. O código e as dependências do sistema sob teste não foram alterados; os gates que identificam divergências reais permanecem bloqueantes.
 
 Após os ajustes da suíte, a validação local passou em `frontend/npm run format:check` e `frontend/npm run verify` (ESLint, 53 testes unitários e build de produção). Também passaram os builds Maven com `-DskipITs verify` nos dois serviços: 14 testes unitários do Catálogo e 25 de Pedidos, com compilação das fontes de teste de integração. Os testes Testcontainers completos ainda dependem de uma execução em runner Linux compatível.
+
+Na CI #2, `performance-qa` e `security-baseline` passaram; `catalog-service`, `order-service`, `functional-qa` e `node-security` falharam. `docker-build`/`publish-images` foram ignorados. Portanto, os gates ainda não estão verdes e o PR não está aprovado para merge/publicação.

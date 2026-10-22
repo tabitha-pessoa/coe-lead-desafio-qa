@@ -99,6 +99,7 @@ Para `PROD-003`, `validTo` é omitido. Para `PROD-005` e `PROD-006`, `currentPri
 - X-Request-Id / trace: não preservado no registro de execução disponível.
 - Screenshot / Playwright trace / logs: cenário da API em `catalog.spec.ts`; divergência reportada após comparar a resposta ao contrato.
 - Evidência adicional: GitHub Actions CI #1, job `catalog-service`, commit `f56e0128fd19d374f1af7c13f7db1fb06dec849c`; `CatalogApiIT.batchPricesReturnsNullCurrentPriceForProductWithoutValidWindow` falhou na asserção da linha 105. [Logs do job](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632/job/119583273820).
+- Confirmação: o mesmo teste falhou na CI #2 após estabilização dos fixtures, descartando uma data de preço vencida como causa. [Logs do job](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39707684840/job/119591457166).
 - Scanner / advisory / artifact link (for security findings): não aplicável.
 
 ## Impact and severity (S1-S4)
@@ -421,6 +422,10 @@ S3 — provisório, aguardando decisão de arquitetura/segurança. A ausência d
 
 Na execução do PR #1, oito testes Playwright falharam em quatro grupos já descritos em QA-ISSUE-001 a 004. Consulte o [job functional-qa](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632/job/119583274178) e seu artifact para os cenários e traces. A integração Java também reforçou QA-ISSUE-002 e revelou a divergência de timeout registrada em QA-ISSUE-008. As alterações posteriores nos testes/configuração ainda precisam de uma nova execução para confirmar a resolução dos problemas de suíte.
 
+## Reexecução GitHub Actions #2 (22/10/2026)
+
+A correção de fixture eliminou as falhas espúrias de criação/indisponibilidade e a expectativa SQL rígida; `OrderPersistenceIT` passou (3/3), e `order-service` ficou com apenas `catalogTimeoutReturns504` falhando (500 em vez de 504). O Catálogo manteve uma falha (campo nulo omitido). A suíte Playwright ainda reportou oito falhas nos quatro grupos QA-ISSUE-001 a 004. Evidências: [order-service](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39707684840/job/119591457029), [catalog-service](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39707684840/job/119591457166) e [functional-qa](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39707684840/job/119591457269).
+
 ## QA-ISSUE-008 — Timeout de leitura do Catálogo retorna HTTP 500 em vez de 504
 
 ## Summary
@@ -458,9 +463,9 @@ O job CI registrou HTTP `500` no teste `catalogTimeoutReturns504`, apesar de a e
 
 ## Evidence
 
-- HTTP status / sanitized payload: status observado `500`; o CI reporta falha da asserção `expected: <504> but was: <500>`.
+- HTTP status / sanitized payload: status observado `500`; CI #1 e CI #2 reportaram falha da asserção `expected: <504> but was: <500>`.
 - X-Request-Id / trace: disponível no log do serviço durante a execução; consultar os logs do job.
-- Screenshot / Playwright trace / logs: [job `order-service`, CI #1](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632/job/119583274202).
+- Screenshot / Playwright trace / logs: [job `order-service`, CI #2](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39707684840/job/119591457029); a falha também estava presente na [CI #1](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632/job/119583274202).
 - Scanner / advisory / artifact link (for security findings): não aplicável.
 
 ## Impact and severity (S1-S4)

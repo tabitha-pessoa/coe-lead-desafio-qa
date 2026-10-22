@@ -14,8 +14,8 @@ O código do sistema sob teste não foi alterado. O workflow GitHub Actions rete
 
 ## Environment and commit
 
-- Ambiente: GitHub Actions, job `node-security`, execução CI #1 em 22/10/2026.
-- Commit: `f56e0128fd19d374f1af7c13f7db1fb06dec849c`, branch `feature/COE-Leader`.
+- Ambiente: GitHub Actions, job `node-security`, execuções CI #1 e #2 em 22/10/2026.
+- Commits: `f56e0128fd19d374f1af7c13f7db1fb06dec849c` e `6676d3bdf39e7918512a777420f27a1092c5913d`, branch `feature/COE-Leader`.
 
 ## Requirement / test case
 
@@ -56,8 +56,8 @@ O npm audita a árvore resolvida; findings transitivos podem aparecer associados
 
 - HTTP status / sanitized payload: não aplicável.
 - X-Request-Id / trace: não aplicável.
-- Screenshot / Playwright trace / logs: job `node-security` da CI #1; frontend falhou no nível `high`, QA passou com zero vulnerabilidades.
-- Scanner / advisory / artifact link (for security findings): [artifact npm-audit-reports da CI #1](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632/artifacts/12394855315).
+- Screenshot / Playwright trace / logs: jobs `node-security` das CI #1 e #2; frontend falhou no nível `high`, QA passou com zero vulnerabilidades.
+- Scanner / advisory / artifact link (for security findings): [artifact npm-audit-reports da CI #1](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632/artifacts/12394855315); [CI #2](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39707684840).
 
 ## Impact and severity (S1-S4)
 
@@ -206,7 +206,7 @@ S3 — provisório para o status incorreto e o sinal operacional; sem evidência
 - O baseline ZAP local foi executado nos três alvos e gerou JSON/HTML. Resumo: frontend com 8 alertas não informativos e 2 informativos; cada API com 1 alerta não informativo e 1 informativo.
 - Os relatórios temporários foram removidos após a triagem. A execução local não valida a publicação de artifacts no GitHub Actions.
 - OWASP Dependency-Check Maven está configurado no CI, mas os jobs Java falharam em `mvn verify` antes de chegar às etapas Dependency-Check.
-- A execução [CI #1](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632) confirmou os resultados dos jobs; artifacts devem ser verificados individualmente antes de afirmar retenção de cada relatório.
+- As execuções [CI #1](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632) e [CI #2](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39707684840) confirmaram os resultados dos jobs; artifacts devem ser verificados individualmente antes de afirmar retenção de cada relatório.
 - O gate `node-security` bloqueia build/publicação quando a auditoria frontend encontra advisories altos/críticos, até remediação ou aceite formal.
 - Para correção/triagem de cada comportamento reproduzido, consultar [issues.md](./issues.md). A remediação de dependências requer aprovação do responsável pelo produto; o sistema sob teste foi preservado.
 - Manter credenciais, segredos, dados pessoais reais e payloads sensíveis fora de issues e artifacts.
