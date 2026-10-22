@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "artifactType": "shared-conversation-reference",
+  "provider": "OpenAI ChatGPT",
+  "conversationTitle": "Planejar desafio técnico QA",
+  "shareUrl": "https://chatgpt.com/share/6ad936ce-c350-83e9-b576-dbf894a10eeb",
+  "capturedAt": "2026-10-21",
+  "transcript": {
+    "included": false,
+    "status": "not-retrieved",
+    "reason": "The public page exposed the conversation title, but the transcript was not present in the fetched HTML and the browser content requests returned HTTP 401.",
+    "note": "This JSON is a reference record for the candidate-provided share link, not an export or complete transcript. Export the original conversation from an authorized ChatGPT interface before replacing this file with a full transcript."
+  },
+  "candidateProvidedContext": {
+    "toolsUsed": [
+      "ChatGPT (GPT)",
+      "GitHub Copilot"
+    ],
+    "saiAppNotUsedBecause": "SAI App 3.0 required a corporate or student Microsoft account that the candidate did not have.",
+    "copilotEvidenceNote": "The candidate reports using GitHub Copilot. No Copilot prompt or suggestion history was exported, so this file does not attribute specific edits to Copilot."
+  },
+  "relatedDocumentation": "docs/qa/05-ai-usage.md"
+}

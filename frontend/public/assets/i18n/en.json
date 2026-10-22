@@ -1,0 +1,184 @@
+{
+  "app": {
+    "name": "Orders & Catalog",
+    "title": "Orders & Catalog — COE Lead Challenge"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "orders": "Orders",
+    "catalog": "Catalog",
+    "menu": "Navigation menu"
+  },
+  "common": {
+    "loading": "Loading…",
+    "retry": "Try again",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "close": "Close",
+    "back": "Back",
+    "actions": "Actions"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Metrics derived from data loaded from the APIs",
+    "ordersTotal": "Total orders",
+    "ordersLoaded": "Loaded orders",
+    "valueLoaded": "Total value (loaded orders)",
+    "byStatus": "Orders by status (loaded)",
+    "gapTitle": "Unavailable metrics",
+    "gapMessage": "Additional metrics (consolidated revenue, average ticket, time series) require specific backend endpoints.",
+    "quickActions": "Quick actions",
+    "newOrder": "Create order",
+    "viewOrders": "View orders",
+    "viewCatalog": "Browse catalog",
+    "empty": "No orders loaded yet."
+  },
+  "orders": {
+    "title": "Orders",
+    "new": "New order",
+    "empty": "No orders found",
+    "emptyHint": "Create the first order of the application.",
+    "list": {
+      "id": "ID",
+      "client": "Client",
+      "items": "Items",
+      "subtotal": "Subtotal",
+      "discount": "Discount",
+      "total": "Total",
+      "status": "Status",
+      "createdAt": "Created at",
+      "actions": "Actions",
+      "view": "View",
+      "viewAria": "View order {{id}}",
+      "pagination": "Orders pagination"
+    },
+    "detail": {
+      "title": "Order details",
+      "clientCard": "Client",
+      "name": "Name",
+      "document": "Document",
+      "email": "E-mail",
+      "summaryCard": "Order summary",
+      "itemsCard": "Order items",
+      "product": "Product",
+      "quantity": "Quantity",
+      "unitPrice": "Unit price",
+      "lineTotal": "Subtotal",
+      "notFound": "Order not found."
+    },
+    "form": {
+      "title": "New order",
+      "subtitle": "Prices and validations are confirmed by the order service upon creation",
+      "clientSection": "Client data",
+      "name": "Name",
+      "namePlaceholder": "Full name",
+      "document": "Document",
+      "documentPlaceholder": "ID or tax number",
+      "email": "E-mail",
+      "emailPlaceholder": "email@example.com",
+      "itemsSection": "Order items",
+      "productId": "Product",
+      "productIdPlaceholder": "Product ID (e.g. PROD-001)",
+      "quantity": "Quantity",
+      "addProduct": "Add product",
+      "adding": "Adding…",
+      "selectedItems": "Selected items",
+      "noItems": "No items added. Enter a product ID and click “Add product”.",
+      "remove": "Remove",
+      "removeAria": "Remove item {{name}}",
+      "summary": "Summary",
+      "discountNote": "Discount and total are calculated by the order service upon creation — final values are shown in the order details.",
+      "submit": "Create order",
+      "submitting": "Creating order…",
+      "cancel": "Cancel",
+      "createSuccess": "Order created successfully",
+      "discardTitle": "Discard order?",
+      "discardMessage": "There are unsaved data. Do you really want to leave?",
+      "discardConfirm": "Discard and leave",
+      "productNotFound": "Product not found: {{id}}",
+      "productInactive": "Product inactive in the catalog: {{id}}",
+      "productNoPrice": "Product without a current price: {{id}}",
+      "productDuplicated": "Product already added: {{id}}",
+      "maxItems": "Maximum of 100 items per order.",
+      "invalidQuantity": "Quantity must be between 1 and 999.",
+      "invalidForm": "Check the highlighted fields before continuing."
+    }
+  },
+  "catalog": {
+    "title": "Catalog",
+    "subtitle": "Product and current price lookup",
+    "searchLabel": "Product IDs",
+    "searchHint": "One ID for a single lookup or multiple comma-separated IDs for a batch lookup (max. 50).",
+    "searchPlaceholder": "E.g. PROD-001 or PROD-001, PROD-002",
+    "search": "Search",
+    "searching": "Searching…",
+    "results": "Results",
+    "id": "ID",
+    "name": "Name",
+    "price": "Price",
+    "currency": "Currency",
+    "status": "Status",
+    "noPrice": "No current price",
+    "notFoundIds": "IDs not found: {{ids}}",
+    "empty": "Enter one or more product IDs to search.",
+    "gapTitle": "Lookup by ID",
+    "gapMessage": "The catalog service only offers lookup by ID and batch lookup — there is no full product listing. This indicator requires a specific backend endpoint.",
+    "maxIds": "Search at most 50 IDs at a time.",
+    "productNotFound": "Product not found."
+  },
+  "status": {
+    "CRIADO": "Created",
+    "ATIVO": "Active",
+    "INATIVO": "Inactive"
+  },
+  "errors": {
+    "generic": "An unexpected error occurred. Please try again.",
+    "requestId": "requestId: {{id}}",
+    "codes": {
+      "VALIDATION_ERROR": "Invalid data. Check the information provided.",
+      "ORDER_NOT_FOUND": "Order not found.",
+      "PRODUCT_NOT_FOUND": "Product not found.",
+      "PRODUCT_INACTIVE": "Product inactive in the catalog.",
+      "NO_CURRENT_PRICE": "Product without a current price.",
+      "CATALOG_UNAVAILABLE": "Catalog service unavailable. Please try again shortly.",
+      "CATALOG_TIMEOUT": "Timed out while contacting the catalog. Please try again.",
+      "PAYLOAD_TOO_LARGE": "Payload exceeds the allowed limit.",
+      "DATABASE_ERROR": "Database error. Contact support.",
+      "INVALID_BUSINESS_RULE": "Business rule violated.",
+      "INTERNAL_ERROR": "Internal server error. Contact support.",
+      "UNKNOWN_ERROR": "Unknown error. Please try again."
+    },
+    "status": {
+      "0": "Could not connect to the server. Check your connection.",
+      "400": "Bad request. Check the submitted data.",
+      "404": "Resource not found.",
+      "409": "Conflict — the resource was modified by another operation.",
+      "422": "Business rule violated. Check the order items.",
+      "500": "Internal server error. Please try again.",
+      "502": "Bad gateway. Please try again shortly.",
+      "503": "Service unavailable. Please try again shortly.",
+      "504": "Gateway timeout. Please try again."
+    }
+  },
+  "form": {
+    "required": "Required field.",
+    "email": "Invalid e-mail.",
+    "maxlength": "Exceeds the maximum allowed length.",
+    "min": "Minimum value: {{min}}.",
+    "max": "Maximum value: {{max}}."
+  },
+  "footer": {
+    "text": "Technical challenge — COE Leader Development"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "message": "The page you are looking for does not exist or has been moved.",
+    "home": "Go to Dashboard"
+  },
+  "language": {
+    "label": "Language",
+    "pt-BR": "🇧🇷 Português",
+    "en": "🇺🇸 English",
+    "es": "🇪🇸 Español"
+  }
+}

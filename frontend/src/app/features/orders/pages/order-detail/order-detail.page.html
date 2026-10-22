@@ -1,0 +1,87 @@
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+  <h1 class="h3 mb-0">{{ 'orders.detail.title' | t }}</h1>
+  <a routerLink="/orders" class="btn btn-outline-secondary">
+    <span aria-hidden="true">←</span> {{ 'common.back' | t }}
+  </a>
+</div>
+
+@if (loading()) {
+  <app-loading />
+} @else if (error(); as loadError) {
+  <app-error-state [error]="loadError" (retry)="load()" />
+} @else if (order(); as order) {
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header">{{ 'orders.detail.clientCard' | t }}</div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-4 fw-semibold">{{ 'orders.detail.name' | t }}</dt>
+            <dd class="col-sm-8">{{ order.client.name }}</dd>
+            <dt class="col-sm-4 fw-semibold">{{ 'orders.detail.document' | t }}</dt>
+            <dd class="col-sm-8 font-monospace">{{ order.client.document }}</dd>
+            <dt class="col-sm-4 fw-semibold">{{ 'orders.detail.email' | t }}</dt>
+            <dd class="col-sm-8">{{ order.client.email }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-8">
+      <div class="card h-100">
+        <div class="card-header">{{ 'orders.detail.summaryCard' | t }}</div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-4 fw-semibold">{{ 'orders.list.id' | t }}</dt>
+            <dd class="col-sm-8 font-monospace">{{ order.id }}</dd>
+            <dt class="col-sm-4 fw-semibold">{{ 'orders.list.status' | t }}</dt>
+            <dd class="col-sm-8"><app-status-badge [status]="order.status" /></dd>
+            <dt class="col-sm-4 fw-semibold">{{ 'orders.list.createdAt' | t }}</dt>
+            <dd class="col-sm-8">{{ order.createdAt | appDate: 'medium' }}</dd>
+            <dt class="col-sm-4 fw-semibold">{{ 'orders.list.subtotal' | t }}</dt>
+            <dd class="col-sm-8">{{ order.subtotal | appCurrency }}</dd>
+            <dt class="col-sm-4 fw-semibold">{{ 'orders.list.discount' | t }}</dt>
+            <dd class="col-sm-8">{{ order.discount | appCurrency }}</dd>
+            <dt class="col-sm-4 fw-semibold">{{ 'orders.list.total' | t }}</dt>
+            <dd class="col-sm-8 fs-5 fw-semibold">{{ order.total | appCurrency }}</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">{{ 'orders.detail.itemsCard' | t }}</div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped align-middle mb-0">
+          <caption class="visually-hidden">
+            {{
+              'orders.detail.itemsCard' | t
+            }}
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">{{ 'orders.detail.product' | t }}</th>
+              <th scope="col" class="text-end">{{ 'orders.detail.quantity' | t }}</th>
+              <th scope="col" class="text-end">{{ 'orders.detail.unitPrice' | t }}</th>
+              <th scope="col" class="text-end">{{ 'orders.detail.lineTotal' | t }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of order.items; track item.productId) {
+              <tr>
+                <td>
+                  <span class="d-block">{{ item.productName }}</span>
+                  <span class="font-monospace small text-body-secondary">{{ item.productId }}</span>
+                </td>
+                <td class="text-end">{{ item.quantity }}</td>
+                <td class="text-end">{{ item.unitPrice | appCurrency }}</td>
+                <td class="text-end">{{ item.lineTotal | appCurrency }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+}

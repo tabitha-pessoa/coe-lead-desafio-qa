@@ -1,0 +1,42 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/orders}
+    username: ${POSTGRES_USER:orders}
+    password: ${POSTGRES_PASSWORD:orders}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+  flyway:
+    enabled: true
+
+catalog:
+  base-url: ${CATALOG_BASE_URL:http://localhost:8081}
+  connect-timeout-ms: ${CATALOG_CONNECT_TIMEOUT_MS:2000}
+  read-timeout-ms: ${CATALOG_READ_TIMEOUT_MS:3000}
+
+order:
+  max-payload-bytes: 1048576
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

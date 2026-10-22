@@ -1,0 +1,200 @@
+<div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-4">
+  <div>
+    <h1 class="h3 mb-1">{{ 'orders.form.title' | t }}</h1>
+    <p class="text-body-secondary mb-0">{{ 'orders.form.subtitle' | t }}</p>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header">{{ 'orders.form.clientSection' | t }}</div>
+  <div class="card-body" [formGroup]="orderForm.controls.client">
+    <div class="row g-3">
+      <div class="col-12 col-md-6">
+        <label class="form-label" for="client-name">{{ 'orders.form.name' | t }}</label>
+        <input
+          id="client-name"
+          type="text"
+          class="form-control"
+          formControlName="name"
+          [placeholder]="'orders.form.namePlaceholder' | t"
+          [class.is-invalid]="fieldErrorKey(clientControls.name)"
+          autocomplete="name"
+        />
+        @if (fieldErrorKey(clientControls.name); as errorKey) {
+          <div class="invalid-feedback d-block">{{ errorKey | t }}</div>
+        }
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <label class="form-label" for="client-document">{{ 'orders.form.document' | t }}</label>
+        <input
+          id="client-document"
+          type="text"
+          class="form-control"
+          formControlName="document"
+          [placeholder]="'orders.form.documentPlaceholder' | t"
+          [class.is-invalid]="fieldErrorKey(clientControls.document)"
+          autocomplete="off"
+        />
+        @if (fieldErrorKey(clientControls.document); as errorKey) {
+          <div class="invalid-feedback d-block">{{ errorKey | t }}</div>
+        }
+      </div>
+      <div class="col-12 col-md-6 col-lg-3">
+        <label class="form-label" for="client-email">{{ 'orders.form.email' | t }}</label>
+        <input
+          id="client-email"
+          type="email"
+          class="form-control"
+          formControlName="email"
+          [placeholder]="'orders.form.emailPlaceholder' | t"
+          [class.is-invalid]="fieldErrorKey(clientControls.email)"
+          autocomplete="email"
+        />
+        @if (fieldErrorKey(clientControls.email); as errorKey) {
+          <div class="invalid-feedback d-block">{{ errorKey | t }}</div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<form [formGroup]="addProductForm" (ngSubmit)="addProduct()">
+  <div class="card mb-4">
+    <div class="card-header">{{ 'orders.form.itemsSection' | t }}</div>
+    <div class="card-body">
+      <div class="row g-3 align-items-end mb-4">
+        <div class="col-12 col-md-6 col-lg-5">
+          <label class="form-label" for="item-product-id">{{ 'orders.form.productId' | t }}</label>
+          <input
+            id="item-product-id"
+            type="text"
+            class="form-control"
+            formControlName="productId"
+            [placeholder]="'orders.form.productIdPlaceholder' | t"
+            [class.is-invalid]="fieldErrorKey(addProductForm.controls.productId)"
+          />
+          @if (fieldErrorKey(addProductForm.controls.productId); as errorKey) {
+            <div class="invalid-feedback d-block">{{ errorKey | t }}</div>
+          }
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+          <label class="form-label" for="item-quantity">{{ 'orders.form.quantity' | t }}</label>
+          <input
+            id="item-quantity"
+            type="number"
+            class="form-control"
+            formControlName="quantity"
+            min="1"
+            max="999"
+            [class.is-invalid]="fieldErrorKey(addProductForm.controls.quantity)"
+          />
+          @if (fieldErrorKey(addProductForm.controls.quantity); as errorKey) {
+            <div class="invalid-feedback d-block">{{ errorKey | t }}</div>
+          }
+        </div>
+        <div class="col-6 col-md-3 col-lg-5">
+          <button type="submit" class="btn btn-outline-primary w-100" [disabled]="addingProduct()">
+            @if (addingProduct()) {
+              <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+              {{ 'orders.form.adding' | t }}
+            } @else {
+              {{ 'orders.form.addProduct' | t }}
+            }
+          </button>
+        </div>
+      </div>
+
+      <h2 class="h6 mb-2">{{ 'orders.form.selectedItems' | t }}</h2>
+      @if (itemsControls.length === 0) {
+        <p class="text-body-secondary mb-0">{{ 'orders.form.noItems' | t }}</p>
+      } @else {
+        <div class="table-responsive">
+          <table class="table table-striped align-middle">
+            <caption class="visually-hidden">
+              {{
+                'orders.form.selectedItems' | t
+              }}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">{{ 'orders.detail.product' | t }}</th>
+                <th scope="col" class="text-end">{{ 'orders.detail.quantity' | t }}</th>
+                <th scope="col" class="text-end">{{ 'orders.detail.unitPrice' | t }}</th>
+                <th scope="col" class="text-end">{{ 'orders.detail.lineTotal' | t }}</th>
+                <th scope="col">
+                  <span class="visually-hidden">{{ 'common.actions' | t }}</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of itemsControls; track item; let i = $index) {
+                <tr [formGroup]="item">
+                  <td>
+                    <span class="d-block">{{ item.controls.productName.value }}</span>
+                    <span class="font-monospace small text-body-secondary">
+                      {{ item.controls.productId.value }}
+                    </span>
+                  </td>
+                  <td class="text-end" style="min-width: 7rem">
+                    <input
+                      type="number"
+                      class="form-control form-control-sm text-end"
+                      formControlName="quantity"
+                      min="1"
+                      max="999"
+                      [class.is-invalid]="fieldErrorKey(item.controls.quantity)"
+                      [attr.aria-label]="
+                        ('orders.detail.quantity' | t) + ': ' + item.controls.productName.value
+                      "
+                    />
+                    @if (fieldErrorKey(item.controls.quantity); as errorKey) {
+                      <div class="invalid-feedback d-block text-end">{{ errorKey | t }}</div>
+                    }
+                  </td>
+                  <td class="text-end">{{ item.controls.unitPrice.value | appCurrency }}</td>
+                  <td class="text-end">{{ lineTotal(item) | appCurrency }}</td>
+                  <td class="text-end">
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="removeItem(i)"
+                      [attr.aria-label]="
+                        'orders.form.removeAria' | t: { name: item.controls.productName.value }
+                      "
+                    >
+                      {{ 'orders.form.remove' | t }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</form>
+
+<div class="card">
+  <div class="card-header">{{ 'orders.form.summary' | t }}</div>
+  <div class="card-body">
+    <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+      <span>{{ 'orders.list.subtotal' | t }}</span>
+      <span class="fw-semibold">{{ subtotal() | appCurrency }}</span>
+    </div>
+    <p class="text-body-secondary small mb-4">{{ 'orders.form.discountNote' | t }}</p>
+    <div class="d-flex flex-wrap justify-content-between gap-2">
+      <button type="button" class="btn btn-outline-secondary" (click)="cancel()">
+        {{ 'orders.form.cancel' | t }}
+      </button>
+      <button type="button" class="btn btn-primary" [disabled]="submitting()" (click)="submit()">
+        @if (submitting()) {
+          <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+          {{ 'orders.form.submitting' | t }}
+        } @else {
+          {{ 'orders.form.submit' | t }}
+        }
+      </button>
+    </div>
+  </div>
+</div>

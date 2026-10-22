@@ -1,0 +1,184 @@
+{
+  "app": {
+    "name": "Pedidos y Catálogo",
+    "title": "Pedidos y Catálogo — Reto COE Lead"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "orders": "Pedidos",
+    "catalog": "Catálogo",
+    "menu": "Menú de navegación"
+  },
+  "common": {
+    "loading": "Cargando…",
+    "retry": "Reintentar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "close": "Cerrar",
+    "back": "Volver",
+    "actions": "Acciones"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "subtitle": "Indicadores derivados de los datos cargados de las APIs",
+    "ordersTotal": "Total de pedidos",
+    "ordersLoaded": "Pedidos cargados",
+    "valueLoaded": "Valor total (pedidos cargados)",
+    "byStatus": "Pedidos por estado (cargados)",
+    "gapTitle": "Indicadores no disponibles",
+    "gapMessage": "Métricas adicionales (ingresos consolidados, ticket medio, evolución temporal) requieren endpoints específicos en el backend.",
+    "quickActions": "Acciones rápidas",
+    "newOrder": "Crear pedido",
+    "viewOrders": "Ver pedidos",
+    "viewCatalog": "Consultar catálogo",
+    "empty": "Aún no hay pedidos cargados."
+  },
+  "orders": {
+    "title": "Pedidos",
+    "new": "Nuevo pedido",
+    "empty": "No se encontraron pedidos",
+    "emptyHint": "Crea el primer pedido de la aplicación.",
+    "list": {
+      "id": "ID",
+      "client": "Cliente",
+      "items": "Artículos",
+      "subtotal": "Subtotal",
+      "discount": "Descuento",
+      "total": "Total",
+      "status": "Estado",
+      "createdAt": "Fecha de creación",
+      "actions": "Acciones",
+      "view": "Ver",
+      "viewAria": "Ver pedido {{id}}",
+      "pagination": "Paginación de pedidos"
+    },
+    "detail": {
+      "title": "Detalles del pedido",
+      "clientCard": "Cliente",
+      "name": "Nombre",
+      "document": "Documento",
+      "email": "Correo electrónico",
+      "summaryCard": "Resumen del pedido",
+      "itemsCard": "Artículos del pedido",
+      "product": "Producto",
+      "quantity": "Cantidad",
+      "unitPrice": "Precio unitario",
+      "lineTotal": "Subtotal",
+      "notFound": "Pedido no encontrado."
+    },
+    "form": {
+      "title": "Nuevo pedido",
+      "subtitle": "Precios y validaciones son confirmados por el servicio de pedidos al crear",
+      "clientSection": "Datos del cliente",
+      "name": "Nombre",
+      "namePlaceholder": "Nombre completo",
+      "document": "Documento",
+      "documentPlaceholder": "CPF o CNPJ",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "correo@ejemplo.com",
+      "itemsSection": "Artículos del pedido",
+      "productId": "Producto",
+      "productIdPlaceholder": "ID del producto (p. ej. PROD-001)",
+      "quantity": "Cantidad",
+      "addProduct": "Añadir producto",
+      "adding": "Añadiendo…",
+      "selectedItems": "Artículos seleccionados",
+      "noItems": "Ningún artículo añadido. Introduce el ID de un producto y pulsa “Añadir producto”.",
+      "remove": "Quitar",
+      "removeAria": "Quitar artículo {{name}}",
+      "summary": "Resumen",
+      "discountNote": "El descuento y el total los calcula el servicio de pedidos en el momento de la creación — los valores finales se mostrarán en el detalle del pedido.",
+      "submit": "Crear pedido",
+      "submitting": "Creando pedido…",
+      "cancel": "Cancelar",
+      "createSuccess": "Pedido creado correctamente",
+      "discardTitle": "¿Descartar pedido?",
+      "discardMessage": "Hay datos sin guardar. ¿Seguro que quieres salir?",
+      "discardConfirm": "Descartar y salir",
+      "productNotFound": "Producto no encontrado: {{id}}",
+      "productInactive": "Producto inactivo en el catálogo: {{id}}",
+      "productNoPrice": "Producto sin precio vigente: {{id}}",
+      "productDuplicated": "Producto ya añadido: {{id}}",
+      "maxItems": "Máximo de 100 artículos por pedido.",
+      "invalidQuantity": "La cantidad debe estar entre 1 y 999.",
+      "invalidForm": "Revisa los campos destacados antes de continuar."
+    }
+  },
+  "catalog": {
+    "title": "Catálogo",
+    "subtitle": "Consulta de productos y precios vigentes",
+    "searchLabel": "IDs de productos",
+    "searchHint": "Un ID para consulta individual o varios IDs separados por comas para consulta por lote (máx. 50).",
+    "searchPlaceholder": "P. ej. PROD-001 o PROD-001, PROD-002",
+    "search": "Consultar",
+    "searching": "Consultando…",
+    "results": "Resultados",
+    "id": "ID",
+    "name": "Nombre",
+    "price": "Precio",
+    "currency": "Moneda",
+    "status": "Estado",
+    "noPrice": "Sin precio vigente",
+    "notFoundIds": "IDs no encontrados: {{ids}}",
+    "empty": "Introduce uno o más IDs de productos para consultar.",
+    "gapTitle": "Consulta por ID",
+    "gapMessage": "El servicio de catálogo solo ofrece consulta por ID y consulta por lote — no existe un listado completo de productos. Este indicador requiere un endpoint específico en el backend.",
+    "maxIds": "Consulta como máximo 50 IDs a la vez.",
+    "productNotFound": "Producto no encontrado."
+  },
+  "status": {
+    "CRIADO": "Creado",
+    "ATIVO": "Activo",
+    "INATIVO": "Inactivo"
+  },
+  "errors": {
+    "generic": "Ocurrió un error inesperado. Inténtalo de nuevo.",
+    "requestId": "requestId: {{id}}",
+    "codes": {
+      "VALIDATION_ERROR": "Datos inválidos. Revisa la información proporcionada.",
+      "ORDER_NOT_FOUND": "Pedido no encontrado.",
+      "PRODUCT_NOT_FOUND": "Producto no encontrado.",
+      "PRODUCT_INACTIVE": "Producto inactivo en el catálogo.",
+      "NO_CURRENT_PRICE": "Producto sin precio vigente.",
+      "CATALOG_UNAVAILABLE": "Servicio de catálogo no disponible. Inténtalo de nuevo en unos instantes.",
+      "CATALOG_TIMEOUT": "Tiempo excedido al consultar el catálogo. Inténtalo de nuevo.",
+      "PAYLOAD_TOO_LARGE": "El contenido enviado excede el límite permitido.",
+      "DATABASE_ERROR": "Error en la base de datos. Contacta con soporte.",
+      "INVALID_BUSINESS_RULE": "Regla de negocio violada.",
+      "INTERNAL_ERROR": "Error interno del servidor. Contacta con soporte.",
+      "UNKNOWN_ERROR": "Error desconocido. Inténtalo de nuevo."
+    },
+    "status": {
+      "0": "No se pudo conectar al servidor. Revisa tu conexión.",
+      "400": "Solicitud inválida. Revisa los datos enviados.",
+      "404": "Recurso no encontrado.",
+      "409": "Conflicto — el recurso fue modificado por otra operación.",
+      "422": "Regla de negocio violada. Revisa los artículos del pedido.",
+      "500": "Error interno del servidor. Inténtalo de nuevo.",
+      "502": "Gateway no disponible. Inténtalo de nuevo en unos instantes.",
+      "503": "Servicio no disponible. Inténtalo de nuevo en unos instantes.",
+      "504": "Tiempo excedido en el gateway. Inténtalo de nuevo."
+    }
+  },
+  "form": {
+    "required": "Campo obligatorio.",
+    "email": "Correo electrónico inválido.",
+    "maxlength": "Excede la longitud máxima permitida.",
+    "min": "Valor mínimo: {{min}}.",
+    "max": "Valor máximo: {{max}}."
+  },
+  "footer": {
+    "text": "Reto técnico — COE Leader Desarrollo"
+  },
+  "notFound": {
+    "title": "Página no encontrada",
+    "message": "La página que buscas no existe o fue movida.",
+    "home": "Ir al Panel"
+  },
+  "language": {
+    "label": "Idioma",
+    "pt-BR": "🇧🇷 Português",
+    "en": "🇺🇸 English",
+    "es": "🇪🇸 Español"
+  }
+}

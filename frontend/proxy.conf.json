@@ -1,0 +1,18 @@
+{
+  "/api/orders": {
+    "target": "http://localhost:8080",
+    "pathRewrite": {
+      "^/api/orders": "/api/v1/orders"
+    },
+    "changeOrigin": true,
+    "secure": false
+  },
+  "/api/catalog": {
+    "target": "http://localhost:8081",
+    "pathRewrite": {
+      "^/api/catalog": "/api/v1/products"
+    },
+    "changeOrigin": true,
+    "secure": false
+  }
+}

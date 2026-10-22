@@ -1,0 +1,64 @@
+name: Scheduled Security Baseline
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  zap-baseline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      COMPOSE_PROJECT_NAME: qa-security-scheduled-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start disposable application
+        run: docker compose up --build -d
+      - name: Wait for application endpoints
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/actuator/health >/dev/null && curl -fsS http://localhost:8081/actuator/health >/dev/null && curl -fsS http://localhost:4200/ >/dev/null; then exit 0; fi
+            sleep 5
+          done
+          docker compose ps
+          docker compose logs --no-color
+          exit 1
+      - name: Run OWASP ZAP passive baseline against local services
+        run: |
+          set +e
+          result=0
+          for target in frontend:80 order-service:8080 catalog-service:8081; do
+            case "$target" in
+              frontend:80) name=frontend ;;
+              order-service:8080) name=orders ;;
+              catalog-service:8081) name=catalog ;;
+            esac
+            docker run --rm --network "${COMPOSE_PROJECT_NAME}_default" \
+              -v "$GITHUB_WORKSPACE:/zap/wrk/:rw" \
+              ghcr.io/zaproxy/zaproxy:stable \
+              zap-baseline.py -t "http://${target%:*}:${target#*:}" -m 2 -I \
+              -J "zap-${name}.json" -r "zap-${name}.html"
+            scan_status=$?
+            if [ "$scan_status" -ne 0 ]; then result=1; fi
+          done
+          exit "$result"
+      - name: Upload ZAP reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-reports
+          path: |
+            zap-frontend.json
+            zap-frontend.html
+            zap-orders.json
+            zap-orders.html
+            zap-catalog.json
+            zap-catalog.html
+          if-no-files-found: ignore
+      - name: Stop application
+        if: always()
+        run: docker compose down -v

@@ -1,0 +1,100 @@
+<div class="d-flex flex-wrap align-items-end justify-content-between gap-2 mb-4">
+  <div>
+    <h1 class="h3 mb-1">{{ 'catalog.title' | t }}</h1>
+    <p class="text-body-secondary mb-0">{{ 'catalog.subtitle' | t }}</p>
+  </div>
+</div>
+
+<div class="alert alert-secondary d-flex gap-2 align-items-start" role="note">
+  <span class="fw-semibold">{{ 'catalog.gapTitle' | t }}</span>
+  <span>{{ 'catalog.gapMessage' | t }}</span>
+</div>
+
+<form [formGroup]="searchForm" (ngSubmit)="search()">
+  <div class="card mb-4">
+    <div class="card-body">
+      <label class="form-label fw-semibold" for="catalog-ids">{{
+        'catalog.searchLabel' | t
+      }}</label>
+      <input
+        id="catalog-ids"
+        type="text"
+        class="form-control"
+        formControlName="ids"
+        [placeholder]="'catalog.searchPlaceholder' | t"
+        [class.is-invalid]="submitted() && searchForm.controls.ids.invalid"
+        aria-describedby="catalog-ids-help"
+      />
+      <div id="catalog-ids-help" class="form-text">{{ 'catalog.searchHint' | t }}</div>
+      @if (submitted() && searchForm.controls.ids.invalid) {
+        <div class="invalid-feedback d-block">{{ 'form.required' | t }}</div>
+      }
+      <div class="mt-3">
+        <button type="submit" class="btn btn-primary" [disabled]="searching()">
+          @if (searching()) {
+            <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+            {{ 'catalog.searching' | t }}
+          } @else {
+            {{ 'catalog.search' | t }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+
+@if (searching()) {
+  <app-loading />
+} @else if (error(); as searchError) {
+  <app-error-state [error]="searchError" (retry)="search()" />
+} @else if (results(); as rows) {
+  <h2 class="h5 mb-3">{{ 'catalog.results' | t }}</h2>
+  @if (notFoundIds().length > 0) {
+    <div class="alert alert-warning" role="alert">
+      {{ 'catalog.notFoundIds' | t: { ids: notFoundIds().join(', ') } }}
+    </div>
+  }
+  <div class="table-responsive">
+    <table class="table table-striped align-middle">
+      <caption class="visually-hidden">
+        {{
+          'catalog.results' | t
+        }}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">{{ 'catalog.id' | t }}</th>
+          <th scope="col">{{ 'catalog.name' | t }}</th>
+          <th scope="col" class="text-end">{{ 'catalog.price' | t }}</th>
+          <th scope="col">{{ 'catalog.currency' | t }}</th>
+          <th scope="col">{{ 'catalog.status' | t }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows; track row.id) {
+          <tr>
+            <td class="font-monospace">{{ row.id }}</td>
+            <td>{{ row.name }}</td>
+            <td class="text-end">
+              @if (row.currentPrice) {
+                {{ row.currentPrice.value | appCurrency: row.currentPrice.currency }}
+              } @else {
+                <span class="text-body-secondary" title="{{ 'catalog.noPrice' | t }}"> — </span>
+              }
+            </td>
+            <td>{{ row.currentPrice?.currency ?? '—' }}</td>
+            <td><app-status-badge [status]="row.status" /></td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="text-center text-body-secondary py-4">
+              {{ 'catalog.empty' | t }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+} @else {
+  <app-empty-state messageKey="catalog.empty" />
+}
