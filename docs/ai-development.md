@@ -4,7 +4,7 @@
 
 **Motivo da escolha:** o desafio exige uso eficaz de IA ao longo do ciclo. GPT foi usado para apoiar tarefas com contexto amplo e análise/documentação; GitHub Copilot forneceu assistência integrada ao editor. As duas ferramentas foram usadas como apoio, com decisões de arquitetura, negócio e aceite mantidas sob revisão humana.
 
-**Link da conversa ChatGPT:** [Planejar desafio técnico QA](https://chatgpt.com/share/6ad936ce-c350-83e9-b576-dbf894a10eeb). Um registro JSON de referência está em [docs/qa/chatgpt-share-evidence.json](qa/chatgpt-share-evidence.json); ele não é o transcript integral, pois a página compartilhada não disponibilizou o conteúdo durante a captura.
+**Link da conversa ChatGPT:** [Planejar desafio técnico QA](https://chatgpt.com/share/6ad936ce-c350-83e9-b576-dbf894a10eeb) e arquivo copilot.md tem os prompts do copilot.
 
 ## Metodologia: Spec-Driven Development (SDD)
 
