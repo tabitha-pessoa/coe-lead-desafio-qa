@@ -1,5 +1,7 @@
 # Desafio Técnico — COE Leader Desenvolvimento (Stefanini)
 
+Repositório público: [tabitha-pessoa/coe-lead-desafio-qa](https://github.com/tabitha-pessoa/coe-lead-desafio-qa). A entrega desta rodada está na branch `feature/COE-Leader`; a branch base `main` contém o commit inicial.
+
 Sistema composto por dois microsserviços Java/Spring Boot desenvolvidos com Clean Architecture, testes automatizados, Docker e CI/CD:
 
 | Serviço | Porta | Banco | Responsabilidade |
@@ -157,7 +159,7 @@ Em pull requests e pushes para `develop`, as imagens são construídas para vali
 - **Partes 2–4 — automação:** código de API/UI em `qa-tests/`, performance em `performance/` e configuração CI/CD em `.github/workflows/`.
 - **Parte 5 — execução e reporte:** [relatório de qualidade](docs/qa/02-quality-summary-template.md) e [defeitos detalhados](docs/qa/issues.md).
 - **Diferenciais:** [governança](docs/qa/03-governance-standard.md), [dimensionamento comercial](docs/qa/04-commercial-estimation.md), [uso de IA](docs/qa/05-ai-usage.md), [checklist de segurança](docs/qa/06-security-checklist.md) e [achados de segurança](docs/qa/security-findings.md).
-- **Publicação pendente:** `docs/qa/issues.md` contém sete relatos formatados conforme `.github/ISSUE_TEMPLATE/quality-defect.md`, mas eles ainda não são Issues do GitHub. O workspace está versionado localmente, mas ainda não há remote autenticado nem repositório GitHub criado; publique cada relato como Issue e acrescente seu URL antes da submissão. O link compartilhável do ChatGPT está em `docs/qa/05-ai-usage.md`; o JSON é um registro de referência, não um export integral do transcript, que precisa ser exportado pela interface autorizada do ChatGPT se exigido.
+- **Issues/PR pendentes:** `docs/qa/issues.md` contém sete relatos formatados conforme `.github/ISSUE_TEMPLATE/quality-defect.md`, mas eles ainda precisam ser criados como Issues do GitHub e vinculados aqui. Os commits locais foram enviados ao repositório público na branch `feature/COE-Leader`; ainda não foi aberto PR nem executado o workflow remoto. O link compartilhável do ChatGPT está em `docs/qa/05-ai-usage.md`; o JSON é um registro de referência, não um export integral do transcript, que precisa ser exportado pela interface autorizada do ChatGPT se exigido.
 
 ### Executar os testes de QA localmente
 
