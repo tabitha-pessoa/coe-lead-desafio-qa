@@ -5,9 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stefanini.orders.infrastructure.persistence.OrderJpaRepository;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.QueueDispatcher;
 import okhttp3.mockwebserver.SocketPolicy;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -32,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
+@Execution(ExecutionMode.SAME_THREAD)
 class OrderApiIT {
 
     @Container
@@ -46,6 +51,11 @@ class OrderApiIT {
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    @BeforeEach
+    void resetCatalogResponses() {
+        catalogServer.setDispatcher(new QueueDispatcher());
     }
 
     @DynamicPropertySource

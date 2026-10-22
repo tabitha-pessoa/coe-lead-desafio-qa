@@ -44,3 +44,22 @@ Os dois `clean verify` locais passaram com todos os testes unitários e de integ
 **Adendo — 21/10/2026:** a comparação com a cópia original fornecida encontrou nove arquivos do sistema divergentes. Foram restaurados dos originais os POMs, os DTOs de resposta do Catálogo, o gateway HTTP, dois testes de integração Java e as páginas Angular de Catálogo e formulário de pedido. Após rebuild, comparação SHA-256 confirmou zero diferenças nos arquivos de código/configuração do sistema nas pastas `catalog-service`, `order-service`, `frontend`, `docker` e `docker-compose.yml` (artefatos `target`, `dist` e dependências excluídos). A suíte completa atual passou 65/73; as falhas estão nos quatro grupos de defeitos listados em [issues.md](./issues.md). O teste de desconto restaurou a massa seed no `finally`.
 
 Após a restauração, `frontend/npm run verify` passou: ESLint, 53 testes unitários e build de produção. Não foi possível reexecutar `mvn verify` nesta sessão porque o executável `mvn` não está disponível no PATH. O k6 atual foi executado por meio da imagem Docker oficial em um projeto descartável; os resultados completos estão na tabela acima e os dados criados foram removidos junto com os volumes temporários.
+
+## Adendo — CI GitHub Actions #1 (22/10/2026)
+
+Execução real no PR #1, branch `feature/COE-Leader`, commit `f56e0128fd19d374f1af7c13f7db1fb06dec849c`: [workflow CI](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632).
+
+| Job | Resultado | Evidência / interpretação |
+|---|---|---|
+| `catalog-service` | Falhou | 5 de 6 testes passaram; a resposta omite `currentPrice: null`, reproduzindo QA-ISSUE-002. |
+| `order-service` | Falhou | Quatro asserções: timeout retornou 500 em vez de 504; a criação e a indisponibilidade também falharam sob mock compartilhado; a expectativa rígida de 3 consultas recebeu 2. Os dois últimos cenários estão sendo corrigidos/isolados na suíte antes de concluir se são defeitos do produto. |
+| `frontend` | Falhou | Gate Prettier encontrou apenas o template original do sidebar; teste unitário e build não foram alcançados nesse job. A configuração foi ajustada para preservar esse arquivo de origem, mantendo o check nos demais arquivos. |
+| `functional-qa` | Falhou | 8 cenários Playwright falharam, correspondendo aos comportamentos previamente reportados; consultar [issues.md](./issues.md) e o relatório artifact. |
+| `node-security` | Falhou | 11 pacotes vulneráveis (2 críticos, 6 altos, 3 moderados) no frontend; zero na automação QA. Achados/identificadores e artifact em [security-findings.md](./security-findings.md). |
+| `performance-qa` | Passou | k6 concluiu os thresholds do perfil smoke da esteira. |
+| `security-baseline` | Passou | ZAP baseline passivo concluiu; sucesso do scanner não elimina os findings de configuração já triados. |
+| `docker-build` / `publish-images` | Ignorados | Dependem dos gates anteriores; nenhuma imagem foi construída/publicada por esta execução. |
+
+A execução local de Maven a partir de um container Docker não conseguiu conectar o Testcontainers ao daemon do Docker Desktop; por isso, ela não substitui a validação Linux do GitHub Actions. O workflow continua sendo a evidência principal. O código e as dependências do sistema sob teste não foram alterados; os gates que identificam divergências reais permanecem bloqueantes.
+
+Após os ajustes da suíte, a validação local passou em `frontend/npm run format:check` e `frontend/npm run verify` (ESLint, 53 testes unitários e build de produção). Também passaram os builds Maven com `-DskipITs verify` nos dois serviços: 14 testes unitários do Catálogo e 25 de Pedidos, com compilação das fontes de teste de integração. Os testes Testcontainers completos ainda dependem de uma execução em runner Linux compatível.

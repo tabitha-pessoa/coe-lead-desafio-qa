@@ -4,18 +4,18 @@
 
 Esta verificação é defensiva e limitada à auditoria de dependências e ao baseline passivo OWASP ZAP em ambiente local descartável. Não é pentest nem certificação. Os relatos abaixo seguem os campos de [Quality defect](../../.github/ISSUE_TEMPLATE/quality-defect.md). Severidade é provisória e sujeita à avaliação da equipe de segurança. Alertas heurísticos não são tratados como vulnerabilidades confirmadas.
 
-O código do sistema sob teste não foi alterado. Os relatórios ZAP e o JSON completo do npm audit foram temporários e removidos; os resultados abaixo preservam os dados resumidos efetivamente observados. IDs de advisories individuais não foram preservados e não são inferidos.
+O código do sistema sob teste não foi alterado. O workflow GitHub Actions reteve o JSON do npm audit como artifact, permitindo registrar os identificadores observados abaixo. Os findings de dependência não comprovam que a aplicação seja explorável.
 
 ## QA-ISSUE-006 — Dependências do frontend apresentam advisories críticos e altos
 
 ## Summary
 
-`npm audit --audit-level=high` reportou 11 advisories no lockfile do frontend: 2 críticos, 6 altos e 3 moderados. A auditoria do lockfile da automação QA reportou zero advisories.
+`npm audit --audit-level=high` reportou 11 pacotes vulneráveis no lockfile do frontend: 2 críticos, 6 altos e 3 moderados. A auditoria do lockfile da automação QA reportou zero vulnerabilidades.
 
 ## Environment and commit
 
-- Ambiente: auditoria local do diretório `frontend`, em 21/10/2026.
-- Commit: indisponível; o workspace não possui metadados Git.
+- Ambiente: GitHub Actions, job `node-security`, execução CI #1 em 22/10/2026.
+- Commit: `f56e0128fd19d374f1af7c13f7db1fb06dec849c`, branch `feature/COE-Leader`.
 
 ## Requirement / test case
 
@@ -39,14 +39,25 @@ Não devem permanecer advisories críticos/altos sem triagem, mitigação ou ace
 
 ## Actual result
 
-Foram reportados 11 advisories (2 críticos, 6 altos, 3 moderados). Pacotes diretos afetados incluem `@angular/build`, `@angular/cli` e `@angular/router`; a árvore também lista dependências transitivas como `piscina`, `vite`, `source-map-js`, `http-cache-semantics` e `@modelcontextprotocol/sdk`. O npm indicou correções disponíveis. A automação QA reportou zero advisories. Isso confirma findings na árvore de dependências, não a explorabilidade da aplicação.
+O job `node-security` falhou porque `npm audit --audit-level=high` encontrou 11 pacotes vulneráveis no frontend: 2 críticos, 6 altos e 3 moderados. Os pacotes reportados foram `@angular/build`, `@angular/cli`, `@angular/router`, `@modelcontextprotocol/sdk`, `@vitest/mocker`, `hono`, `http-cache-semantics`, `piscina`, `source-map-js`, `vite` e `vitest`. O relatório indicou atualizações disponíveis dentro das faixas declaradas. O lockfile da automação QA reportou zero vulnerabilidades. Os advisories incluem:
+
+- `@angular/router`: GHSA-62vg-58rm-qff7, GHSA-57xq-rjx2-v5xh.
+- `@modelcontextprotocol/sdk`: GHSA-6qxp-vccf-f47h, GHSA-22jm-h49p-29qw, GHSA-6prh-2h8m-c8cw, GHSA-46jr-4wx8-v453, GHSA-rvq5-wwqv-78pq.
+- `@vitest/mocker`: GHSA-qxg6-89mg-rqv8, GHSA-xp26-3454-mjgp.
+- `hono`: GHSA-5r4p-p66f-jhc7.
+- `http-cache-semantics`: GHSA-ch52-4w7c-c8xp.
+- `piscina`: GHSA-67c8-pqhq-4rmx.
+- `source-map-js`: GHSA-68fv-2mgg-jv7q.
+- `vite`: GHSA-698v-4r3x-3vcv, GHSA-r825-w8mm-5pxw, GHSA-587h-7wmj-h5pm, GHSA-9jrq-w75r-8gcw, GHSA-rq7h-c2jc-7f22.
+
+O npm audita a árvore resolvida; findings transitivos podem aparecer associados a mais de um pacote direto. A presença de advisory no lockfile confirma exposição de dependência, mas não a explorabilidade da aplicação.
 
 ## Evidence
 
 - HTTP status / sanitized payload: não aplicável.
 - X-Request-Id / trace: não aplicável.
-- Screenshot / Playwright trace / logs: resumo da execução local de `npm audit` em 21/10/2026. O JSON original foi removido; os IDs CVE/GHSA individuais não estão disponíveis neste workspace.
-- Scanner / advisory / artifact link (for security findings): npm audit; no GitHub Actions, os JSONs são publicados pelo job `node-security` quando a pipeline for executada.
+- Screenshot / Playwright trace / logs: job `node-security` da CI #1; frontend falhou no nível `high`, QA passou com zero vulnerabilidades.
+- Scanner / advisory / artifact link (for security findings): [artifact npm-audit-reports da CI #1](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632/artifacts/12394855315).
 
 ## Impact and severity (S1-S4)
 
@@ -54,12 +65,12 @@ S2 — provisório, pelo número de advisories críticos/altos e pelo gate de bu
 
 ## Security classification (if applicable)
 
-- CVE / GHSA / CWE: múltiplos advisories; IDs individuais não foram preservados e precisam ser recuperados em nova execução do relatório detalhado.
+- CVE / GHSA / CWE: GHSA IDs listados em Actual result; CVE/CWE não inferidos.
 - Exploitability and affected component (confirmed or still under triage): findings de dependência confirmados pelo npm audit; explorabilidade e componentes em runtime/build ainda sob triagem.
 
 ## Workaround and suspected cause (clearly label hypotheses)
 
-- Workaround: manter o gate bloqueante para build/publicação enquanto os advisories críticos/altos não forem corrigidos ou formalmente aceitos.
+- Workaround: manter o gate bloqueante para build/publicação enquanto os advisories críticos/altos não forem corrigidos ou formalmente aceitos. A cópia do sistema sob teste permanece inalterada; remediação de dependências deve ser aprovada e rastreada pelo responsável do produto.
 - Hipótese: versões registradas no lockfile incluem versões afetadas por advisories publicados. Confirmar caminhos, ambientes de execução e upgrade seguro com engenharia/segurança.
 
 ## QA-ISSUE-007 — Headers de segurança recomendados estão ausentes no frontend
@@ -194,10 +205,10 @@ S3 — provisório para o status incorreto e o sinal operacional; sem evidência
 
 - O baseline ZAP local foi executado nos três alvos e gerou JSON/HTML. Resumo: frontend com 8 alertas não informativos e 2 informativos; cada API com 1 alerta não informativo e 1 informativo.
 - Os relatórios temporários foram removidos após a triagem. A execução local não valida a publicação de artifacts no GitHub Actions.
-- OWASP Dependency-Check Maven está configurado no CI, mas não foi executado nesta rodada.
-- GitHub Actions ainda precisa ser executado para confirmar os jobs, relatórios e artifacts.
+- OWASP Dependency-Check Maven está configurado no CI, mas os jobs Java falharam em `mvn verify` antes de chegar às etapas Dependency-Check.
+- A execução [CI #1](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632) confirmou os resultados dos jobs; artifacts devem ser verificados individualmente antes de afirmar retenção de cada relatório.
 - O gate `node-security` bloqueia build/publicação quando a auditoria frontend encontra advisories altos/críticos, até remediação ou aceite formal.
-- Para correção/triagem de cada comportamento reproduzido, consultar [issues.md](./issues.md) e preencher os detalhes de advisory individuais após nova execução do npm audit.
+- Para correção/triagem de cada comportamento reproduzido, consultar [issues.md](./issues.md). A remediação de dependências requer aprovação do responsável pelo produto; o sistema sob teste foi preservado.
 - Manter credenciais, segredos, dados pessoais reais e payloads sensíveis fora de issues e artifacts.
 
 ## Referências

@@ -92,7 +92,7 @@ class CatalogApiIT {
 
     @Test
     void batchPricesReturnsNullCurrentPriceForProductWithoutValidWindow() {
-        seedProduct("PROD-005", "ATIVO", price("599.00", Instant.parse("2030-01-01T00:00:00Z"), null));
+        seedProduct("PROD-005", "ATIVO", price("599.00", Instant.now().plusSeconds(86_400), null));
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

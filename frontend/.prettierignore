@@ -2,3 +2,6 @@ dist
 coverage
 node_modules
 package-lock.json
+
+# Preserve the supplied application source without whitespace-only edits.
+src/app/layout/sidebar/sidebar.component.html

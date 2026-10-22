@@ -98,6 +98,7 @@ Para `PROD-003`, `validTo` é omitido. Para `PROD-005` e `PROD-006`, `currentPri
 - HTTP status / sanitized payload: consultas individuais retornam resposta de sucesso, mas faltam as propriedades nulas especificadas.
 - X-Request-Id / trace: não preservado no registro de execução disponível.
 - Screenshot / Playwright trace / logs: cenário da API em `catalog.spec.ts`; divergência reportada após comparar a resposta ao contrato.
+- Evidência adicional: GitHub Actions CI #1, job `catalog-service`, commit `f56e0128fd19d374f1af7c13f7db1fb06dec849c`; `CatalogApiIT.batchPricesReturnsNullCurrentPriceForProductWithoutValidWindow` falhou na asserção da linha 105. [Logs do job](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632/job/119583273820).
 - Scanner / advisory / artifact link (for security findings): não aplicável.
 
 ## Impact and severity (S1-S4)
@@ -289,12 +290,12 @@ S3 — provisório: rotas inválidas são classificadas como falha interna, gera
 
 ## Summary
 
-`npm audit --audit-level=high` reportou 11 advisories no lockfile do frontend, incluindo 2 críticos e 6 altos, e o gate bloqueia o build/publicação.
+`npm audit --audit-level=high` reportou 11 pacotes vulneráveis no lockfile do frontend, incluindo 2 críticos, 6 altos e 3 moderados, e o gate bloqueia o build/publicação.
 
 ## Environment and commit
 
-- Ambiente: auditoria npm local em 21/10/2026, no diretório `frontend`.
-- Commit: indisponível; o workspace não possui metadados Git.
+- Ambiente: GitHub Actions, job `node-security`, execução CI #1 em 22/10/2026.
+- Commit: `f56e0128fd19d374f1af7c13f7db1fb06dec849c`, branch `feature/COE-Leader`.
 
 ## Requirement / test case
 
@@ -318,14 +319,14 @@ Nenhuma dependência crítica/alta sem triagem, mitigação ou aceite formal con
 
 ## Actual result
 
-Foram reportados 11 advisories: 2 críticos, 6 altos e 3 moderados. Pacotes diretos afetados incluem `@angular/build`, `@angular/cli` e `@angular/router`; a árvore também lista dependências transitivas como `piscina`, `vite`, `source-map-js`, `http-cache-semantics` e `@modelcontextprotocol/sdk`. O npm indicou correções disponíveis. O lockfile da automação QA reportou zero advisories na mesma verificação.
+Foram reportados 11 pacotes vulneráveis: 2 críticos, 6 altos e 3 moderados. Pacotes afetados, identificadores GHSA e limitações da análise constam em [security-findings.md](./security-findings.md). O npm indicou correções disponíveis. O lockfile da automação QA reportou zero vulnerabilidades na mesma execução.
 
 ## Evidence
 
 - HTTP status / sanitized payload: não aplicável; resultado de auditoria de dependências.
 - X-Request-Id / trace: não aplicável.
-- Screenshot / Playwright trace / logs: saída local `npm audit --audit-level=high` registrada no relatório de segurança; o JSON original não está retido neste workspace.
-- Scanner / advisory / artifact link (for security findings): auditor npm; contagem resumida em [security-findings.md](./security-findings.md). IDs CVE/GHSA individuais precisam ser recuperados executando a auditoria novamente.
+- Screenshot / Playwright trace / logs: job `node-security` da CI #1; frontend falhou no nível `high`, QA passou com zero vulnerabilidades.
+- Scanner / advisory / artifact link (for security findings): [artifact npm-audit-reports da CI #1](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632/artifacts/12394855315); GHSA IDs em [security-findings.md](./security-findings.md).
 
 ## Impact and severity (S1-S4)
 
@@ -333,7 +334,7 @@ S2 — provisório, devido aos advisories classificados como críticos/altos e a
 
 ## Security classification (if applicable)
 
-- CVE / GHSA / CWE: múltiplos advisories; IDs e CWEs individuais não constam no resultado resumido retido.
+- CVE / GHSA / CWE: GHSA IDs listados em [security-findings.md](./security-findings.md); CVE/CWE não inferidos.
 - Exploitability and affected component (confirmed or still under triage): findings de dependência confirmados pelo npm audit; exposição e aplicabilidade no produto ainda sob triagem.
 
 ## Workaround and suspected cause (clearly label hypotheses)
@@ -415,3 +416,63 @@ S3 — provisório, aguardando decisão de arquitetura/segurança. A ausência d
 - A nova cobertura passou em preço/totais adulterados pelo cliente, status inválido, request ID gerado e fornecido, tamanho de corpo exatamente 1 MiB, criação sequencial de pedido, 100 itens na UI e 101 rejeitados.
 - Depois de restaurar o sistema original, o Angular passou lint, 53 testes unitários e build de produção. `mvn` não está no PATH e os testes Java/Testcontainers não foram reexecutados. O smoke k6 atualizado foi executado via container oficial em projeto Compose descartável (524 requisições, 1.257 checks aprovados), incluindo criação; os dados e volumes temporários foram removidos. O workflow CI ainda não foi executado.
 - Para as lacunas e melhorias recomendadas (bordas temporais exatas de `validFrom`/`validTo`, normalização de `size > 100`, payload 1 MiB - 1 byte e resiliência pós-restauração), consultar a seção de revisão de cobertura em [09-sdd-business-rules.md](./09-sdd-business-rules.md).
+
+## Evidência complementar — CI GitHub Actions #1 (22/10/2026)
+
+Na execução do PR #1, oito testes Playwright falharam em quatro grupos já descritos em QA-ISSUE-001 a 004. Consulte o [job functional-qa](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632/job/119583274178) e seu artifact para os cenários e traces. A integração Java também reforçou QA-ISSUE-002 e revelou a divergência de timeout registrada em QA-ISSUE-008. As alterações posteriores nos testes/configuração ainda precisam de uma nova execução para confirmar a resolução dos problemas de suíte.
+
+## QA-ISSUE-008 — Timeout de leitura do Catálogo retorna HTTP 500 em vez de 504
+
+## Summary
+
+Quando a resposta do Catálogo excede o timeout de leitura configurado, `POST /api/v1/orders` retorna `500 INTERNAL_ERROR` em vez de `504 CATALOG_TIMEOUT`.
+
+## Environment and commit
+
+- Ambiente: GitHub Actions em Linux, job `order-service`, com PostgreSQL/Testcontainers e Catálogo simulado por MockWebServer.
+- Branch/commit: `feature/COE-Leader`, `f56e0128fd19d374f1af7c13f7db1fb06dec849c`.
+
+## Requirement / test case
+
+- Catálogo sem resposta dentro do limite deve resultar em HTTP `504 CATALOG_TIMEOUT`.
+- Referência: `docs/api.md` e `OrderApiIT.catalogTimeoutReturns504`.
+
+## Preconditions and synthetic data
+
+- MockWebServer responde com atraso superior ao timeout de leitura de 300 ms.
+- Pedido sintético válido com um item; nenhuma informação real de cliente é usada.
+
+## Steps to reproduce
+
+1. Execute o job `order-service` do workflow CI.
+2. Envie um pedido válido enquanto o Catálogo simulado retarda a resposta por 2 segundos.
+3. Inspecione o status e o código de erro devolvidos pelo serviço de Pedidos.
+
+## Expected result
+
+HTTP `504` com código `CATALOG_TIMEOUT`, envelope de erro padrão e nenhum pedido persistido.
+
+## Actual result
+
+O job CI registrou HTTP `500` no teste `catalogTimeoutReturns504`, apesar de a exceção de rede incluir `java.net.SocketTimeoutException: Read timed out`. A causa provável está no reconhecimento/mapeamento da exceção de timeout; precisa ser confirmada pelo responsável pelo serviço.
+
+## Evidence
+
+- HTTP status / sanitized payload: status observado `500`; o CI reporta falha da asserção `expected: <504> but was: <500>`.
+- X-Request-Id / trace: disponível no log do serviço durante a execução; consultar os logs do job.
+- Screenshot / Playwright trace / logs: [job `order-service`, CI #1](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632/job/119583274202).
+- Scanner / advisory / artifact link (for security findings): não aplicável.
+
+## Impact and severity (S1-S4)
+
+S2 — provisório: falha na classificação de timeout degrada observabilidade e comportamento de retry dos consumidores, além de divergir do contrato.
+
+## Security classification (if applicable)
+
+- CVE / GHSA / CWE: não aplicável.
+- Exploitability and affected component (confirmed or still under triage): divergência funcional confirmada; sem alegação de explorabilidade.
+
+## Workaround and suspected cause (clearly label hypotheses)
+
+- Workaround: nenhum aprovado; consumidores não devem tratar um `500` como timeout de dependência.
+- Hipótese: a exceção de socket pode estar encapsulada de forma diferente da verificação usada pelo gateway; revisar a cadeia de causas e o mapeamento de domínio sem expor detalhes internos na resposta.

@@ -9,6 +9,8 @@ O workflow único `.github/workflows/ci.yml` é executado em pull requests, push
 3. O job de build Docker depende de todos os gates anteriores e constrói as três imagens.
 4. Somente um push para `main` após sucesso de todos os jobs publica no GitHub Container Registry. Pull requests, `develop` e execuções manuais não publicam imagens.
 
+O check Prettier preserva sem alterações de whitespace o template `frontend/src/app/layout/sidebar/sidebar.component.html`, fornecido como parte do sistema sob teste; todos os demais arquivos continuam sujeitos ao check. A exceção evita uma alteração cosmética no código original do desafio.
+
 O job de publicação aplica as tags `sha-<commit>` (imutável por revisão) e `latest`:
 
 - `ghcr.io/<owner>/<repository>-catalog-service`
@@ -37,3 +39,7 @@ O pipeline é intencionalmente bloqueante: os testes atuais reproduzem defeitos 
 Artifacts do workflow incluem relatórios Surefire/Failsafe, Playwright HTML/JUnit, resumo JSON do k6, ambiente/versionamento da execução e amostras periódicas de CPU/memória dos containers. Thresholds k6 são metas provisórias, não SLOs acordados.
 
 O workflow `.github/workflows/security-baseline.yml` também executa ZAP semanalmente (segunda-feira, 04:17 UTC) ou sob despacho manual. Ele usa apenas o baseline passivo contra o stack local e publica relatórios sem abrir issues automaticamente.
+
+### Primeira execução do GitHub Actions
+
+A execução [CI #1](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632), no PR #1 e commit `f56e0128fd19d374f1af7c13f7db1fb06dec849c`, concluiu com falha. `performance-qa` e `security-baseline` passaram; `catalog-service`, `order-service`, `frontend`, `functional-qa` e `node-security` falharam. `docker-build` e `publish-images` foram ignorados por dependerem dos gates aprovados. A triagem está em [issues.md](qa/issues.md) e [security-findings.md](qa/security-findings.md); o artifact de auditoria npm está [neste run](https://github.com/tabitha-pessoa/coe-lead-desafio-qa/actions/runs/39705130632/artifacts/12394855315).

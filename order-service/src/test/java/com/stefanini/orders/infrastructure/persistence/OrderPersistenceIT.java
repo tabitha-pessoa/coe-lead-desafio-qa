@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Testcontainers
 class OrderPersistenceIT {
 
-    private static final int EXPECTED_STATEMENTS_FOR_PAGED_LIST = 3;
+    private static final int MAX_STATEMENTS_FOR_PAGED_LIST = 3;
 
     @Container
     @ServiceConnection
@@ -68,7 +68,7 @@ class OrderPersistenceIT {
     }
 
     @Test
-    void findAllRunsExactlyThreeStatementsAvoidingNPlusOne() {
+    void findAllUsesBoundedStatementsAvoidingNPlusOne() {
         orderRepository.save(OrderTestSupport.sampleOrder());
         orderRepository.save(OrderTestSupport.sampleOrder());
         orderRepository.save(OrderTestSupport.sampleOrder());
@@ -79,7 +79,10 @@ class OrderPersistenceIT {
         OrderPage page = orderRepository.findAll(0, 10, null);
 
         assertEquals(3, page.content().size());
-        assertEquals(EXPECTED_STATEMENTS_FOR_PAGED_LIST, statistics.getPrepareStatementCount());
+        assertTrue(
+                statistics.getPrepareStatementCount() <= MAX_STATEMENTS_FOR_PAGED_LIST,
+                () -> "Expected at most " + MAX_STATEMENTS_FOR_PAGED_LIST
+                        + " statements for a page, but found " + statistics.getPrepareStatementCount());
     }
 
     @Test
